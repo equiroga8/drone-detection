@@ -1,0 +1,61 @@
+#!/usr/bin/env python2
+
+from subprocess import call
+import click
+
+channelFrequencies = {
+	"1": 2412,
+	"2": 2417,
+	"3": 2422,
+	"4": 2427,
+	"5": 2432,
+	"6": 2437,
+	"7": 2442,
+	"8": 2447,
+	"9": 2452,
+	"10": 2457,
+	"11": 2462,
+	"12": 2467,
+	"13": 2472,
+	"36": 5180,
+	"40": 5200,
+	"44": 5220,
+	"48": 5240,
+	"52": 5260,
+	"56": 5280,
+	"60": 5300,
+	"64": 5320,
+	"100": 5500,
+	"104": 5520,
+	"108": 5540,
+	"112": 5560
+}
+
+@click.group()
+def cli():
+    pass
+
+@cli.command()
+@click.option('-c','--channel', default = 1, help="Wifi channel number to listen on")
+@click.argument('interface')
+def start(interface, channel):
+	freq = str(channelFrequencies[str(channel)])
+	click.secho('Setting interface %s to monitor mode on channel %s' % (interface, channel), fg="cyan")
+	call(['systemctl', 'stop', 'NetworkManager'])
+	call(['ip', 'link', 'set', interface, 'down'])
+	call(['iw', interface, 'set', 'monitor', 'control'])
+	call(['ip', 'link', 'set', interface, 'up'])
+	call(['iw', 'dev', 'wlp2s0', 'set', 'freq', freq])
+
+@cli.command()
+@click.argument('interface')
+def stop(interface):
+	click.secho('Setting interface %s to managed mode ' % (interface), fg="cyan")
+	call(['ip', 'link', 'set', interface, 'down'])
+	call(['iw', interface, 'set', 'type', 'managed'])
+	call(['ip', 'link', 'set', interface, 'up'])
+	call(['systemctl', 'start', 'NetworkManager'])
+
+
+if __name__ == '__main__':
+    cli()
