@@ -1,7 +1,10 @@
 #!/usr/bin/env python2
 
 from subprocess import call
+import sys, traceback
 import click
+import pyshark
+from pprint import pprint
 
 channelFrequencies = {
 	"1": 2412,
@@ -33,7 +36,7 @@ channelFrequencies = {
 
 @click.group()
 def cli():
-    pass
+	pass
 
 @cli.command()
 @click.option('-c','--channel', default = 1, help="Wifi channel number to listen on")
@@ -46,6 +49,16 @@ def start(interface, channel):
 	call(['iw', interface, 'set', 'monitor', 'control'])
 	call(['ip', 'link', 'set', interface, 'up'])
 	call(['iw', 'dev', 'wlp2s0', 'set', 'freq', freq])
+	try:
+		cap = pyshark.LiveCapture(interface=interface, display_filter="wlan.fc.type_subtype==0x0008")
+		for packet in cap:
+			click.secho("------------------BEACON-------------------",fg="yellow")
+			#click.secho(str(packet.wlan_radio),fg="yellow")
+			click.secho(str(packet.frame_info.time),fg="yellow")
+			click.secho(str(packet.layers[3].ssid),fg="yellow")
+			pprint(vars(packet.wlan_radio), indent=2)
+	except RuntimeError:
+		click.secho('Exited program', fg="cyan")	
 
 @cli.command()
 @click.argument('interface')
