@@ -1,38 +1,10 @@
 #!/usr/bin/env python2
 
 from subprocess import call
-import sys, traceback
 import click
 import pyshark
-from pprint import pprint
-
-channelFrequencies = {
-	"1": 2412,
-	"2": 2417,
-	"3": 2422,
-	"4": 2427,
-	"5": 2432,
-	"6": 2437,
-	"7": 2442,
-	"8": 2447,
-	"9": 2452,
-	"10": 2457,
-	"11": 2462,
-	"12": 2467,
-	"13": 2472,
-	"36": 5180,
-	"40": 5200,
-	"44": 5220,
-	"48": 5240,
-	"52": 5260,
-	"56": 5280,
-	"60": 5300,
-	"64": 5320,
-	"100": 5500,
-	"104": 5520,
-	"108": 5540,
-	"112": 5560
-}
+from dict import channelFrequencies, phyTypes
+from helper import changeToMonitorMode, changeFrequency, captureBeacons, changeToManagedMode
 
 @click.group()
 def cli():
@@ -41,33 +13,42 @@ def cli():
 @cli.command()
 @click.option('-c','--channel', default = 1, help="Wifi channel number to listen on")
 @click.argument('interface')
-def start(interface, channel):
-	freq = str(channelFrequencies[str(channel)])
-	click.secho('Setting interface %s to monitor mode on channel %s' % (interface, channel), fg="cyan")
-	call(['systemctl', 'stop', 'NetworkManager'])
-	call(['ip', 'link', 'set', interface, 'down'])
-	call(['iw', interface, 'set', 'monitor', 'control'])
-	call(['ip', 'link', 'set', interface, 'up'])
-	call(['iw', 'dev', 'wlp2s0', 'set', 'freq', freq])
-	try:
-		cap = pyshark.LiveCapture(interface=interface, display_filter="wlan.fc.type_subtype==0x0008")
-		for packet in cap:
-			click.secho("------------------BEACON-------------------",fg="yellow")
-			#click.secho(str(packet.wlan_radio),fg="yellow")
-			click.secho(str(packet.frame_info.time),fg="yellow")
-			click.secho(str(packet.layers[3].ssid),fg="yellow")
-			pprint(vars(packet.wlan_radio), indent=2)
-	except RuntimeError:
-		click.secho('Exited program', fg="cyan")	
+def static(interface, channel):
+
+	changeToMonitorMode(interface)
+	changeFrequency(interface, channel)
+	captureBeacons(interface)
 
 @cli.command()
 @click.argument('interface')
-def stop(interface):
-	click.secho('Setting interface %s to managed mode ' % (interface), fg="cyan")
-	call(['ip', 'link', 'set', interface, 'down'])
-	call(['iw', interface, 'set', 'type', 'managed'])
-	call(['ip', 'link', 'set', interface, 'up'])
-	call(['systemctl', 'start', 'NetworkManager'])
+def hop(interface):
+	changeToMonitorMode(interface)
+	try:
+		for channel in range(1,12):
+			changeFrequency(interface, channel)
+			cap = pyshark.LiveCapture(interface=interface, display_filter="wlan.fc.type_subtype==0x0008")
+			cap.sniff(timeout=3)
+			for packet in cap.sniff_continuously(packet_count=10):
+				click.secho("------------------BEACON-------------------",fg="yellow")
+				click.secho(str(packet.frame_info.time),fg="yellow")
+				click.secho("SSID: %s" % str(packet.layers[3].ssid),fg="yellow")
+
+				channel = packet.wlan_radio.channel
+				frequency = packet.wlan_radio.frequency
+				version = phyTypes[packet.wlan_radio.phy]
+
+				click.secho("Channel %s (%s MHz) using %s" % (channel, frequency, version),fg="yellow")
+
+				#pprint(vars(packet.wlan_radio), indent=2)
+	except (RuntimeError) as error:
+		click.secho('Exited program', fg="cyan")	
+
+
+
+@cli.command()
+@click.argument('interface')
+def managed(interface):
+	changeToManagedMode(interface)
 
 
 if __name__ == '__main__':
