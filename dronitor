@@ -2,16 +2,18 @@
 
 from subprocess import call
 import click
+import time
+from scapy.all import *
 import pyshark
 from dict import channelFrequencies, phyTypes
-from helper import changeToMonitorMode, changeFrequency, captureBeacons, changeToManagedMode
+from helper import changeToMonitorMode, changeFrequency, captureBeacons, changeToManagedMode, findSSID
 
 @click.group()
 def cli():
 	pass
 
 @cli.command()
-@click.option('-c','--channel', default = 1, help="Wifi channel number to listen on")
+@click.option('-c', '--channel', default=1, help="Wifi channel number to listen on")
 @click.argument('interface')
 def static(interface, channel):
 
@@ -23,27 +25,14 @@ def static(interface, channel):
 @click.argument('interface')
 def hop(interface):
 	changeToMonitorMode(interface)
-	try:
-		for channel in range(1,12):
-			changeFrequency(interface, channel)
-			cap = pyshark.LiveCapture(interface=interface, display_filter="wlan.fc.type_subtype==0x0008")
-			cap.sniff(timeout=3)
-			for packet in cap.sniff_continuously(packet_count=10):
-				click.secho("------------------BEACON-------------------",fg="yellow")
-				click.secho(str(packet.frame_info.time),fg="yellow")
-				click.secho("SSID: %s" % str(packet.layers[3].ssid),fg="yellow")
-
-				channel = packet.wlan_radio.channel
-				frequency = packet.wlan_radio.frequency
-				version = phyTypes[packet.wlan_radio.phy]
-
-				click.secho("Channel %s (%s MHz) using %s" % (channel, frequency, version),fg="yellow")
-
-				#pprint(vars(packet.wlan_radio), indent=2)
-	except (RuntimeError) as error:
-		click.secho('Exited program', fg="cyan")	
-
-
+	while True:
+		try:
+			for key in sorted(channelFrequencies.keys()):
+				changeFrequency(interface, key)
+				time.sleep(0.5)	
+				sniff(iface=interface, prn=findSSID, timeout=1)
+		except (RuntimeError) as error:
+			click.secho('Exited program', fg="cyan")		
 
 @cli.command()
 @click.argument('interface')
@@ -52,4 +41,4 @@ def managed(interface):
 
 
 if __name__ == '__main__':
-    cli()
+	cli()

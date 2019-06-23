@@ -1,7 +1,10 @@
 #!/usr/bin/env python2
 
 import click
+import pprint
 import pyshark
+from scapy.all import *
+import re
 from subprocess import call
 from dict import channelFrequencies, phyTypes
 
@@ -14,7 +17,7 @@ def changeToMonitorMode(interface):
 
 
 def changeFrequency(interface, channel):
-	freq = str(channelFrequencies[str(channel)])
+	freq = str(channelFrequencies[channel])
 	click.secho('-> Setting interface %s to monitor on channel %s (%s MHz)' % (interface, channel, freq), fg="cyan")
 	call(['iw', 'dev', interface, 'set', 'freq', freq])
 
@@ -44,3 +47,15 @@ def changeToManagedMode(interface):
 	call(['iw', interface, 'set', 'type', 'managed'])
 	call(['ip', 'link', 'set', interface, 'up'])
 	call(['systemctl', 'start', 'NetworkManager'])
+
+def findSSID(pkt):
+	#create loop
+	isMACAddress(pkt.addr1)
+	isMACAddress(pkt.addr2)
+	isMACAddress(pkt.addr3)
+	isMACAddress(pkt.addr4)
+
+def isMACAddress(address):
+	address = str(address)
+	if	re.match(r"([0-9a-fA-F]:?){12}", address) and address[:8] == '04:d6:aa':
+		click.secho('Samsung detected', fg="red")
