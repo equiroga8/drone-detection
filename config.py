@@ -1,6 +1,4 @@
 #!/usr/bin/env python2
-
-
 channelFrequencies = {
 	1: 2412,
 	2: 2417,
@@ -29,6 +27,18 @@ channelFrequencies = {
 	112: 5560
 }
 
+droneVendorMACs = {
+
+	'a0:14:3d': 'Parrot',
+	'90:3a:e6': 'Parrot',
+	'90:03:b7': 'Parrot',
+	'00:26:7e': 'Parrot',
+	'00:12:1c': 'Parrot',
+	'60:60:1f': 'DJI'
+	#'04:d6:aa': 'Samsung'
+
+}
+
 phyTypes = {
 	"4": "802.11b",
 	"5": "802.11a",
@@ -36,4 +46,5 @@ phyTypes = {
 	"7": "802.11n",
 	"8": "802.11ac"
 }
+
 

@@ -1,12 +1,8 @@
 #!/usr/bin/env python2
-
-from subprocess import call
 import click
-import time
 from scapy.all import *
-import pyshark
-from dict import channelFrequencies, phyTypes
-from helper import changeToMonitorMode, changeFrequency, captureBeacons, changeToManagedMode, findSSID
+from config import channelFrequencies
+from helper import changeToMonitorMode, changeFrequency, changeToManagedMode, droneDetection
 
 @click.group()
 def cli():
@@ -16,23 +12,18 @@ def cli():
 @click.option('-c', '--channel', default=1, help="Wifi channel number to listen on")
 @click.argument('interface')
 def static(interface, channel):
-
 	changeToMonitorMode(interface)
 	changeFrequency(interface, channel)
-	captureBeacons(interface)
+	sniff(iface=interface, prn=droneDetection)
 
 @cli.command()
 @click.argument('interface')
 def hop(interface):
 	changeToMonitorMode(interface)
 	while True:
-		try:
-			for key in sorted(channelFrequencies.keys()):
-				changeFrequency(interface, key)
-				time.sleep(0.5)	
-				sniff(iface=interface, prn=findSSID, timeout=1)
-		except (RuntimeError) as error:
-			click.secho('Exited program', fg="cyan")		
+		for key in sorted(channelFrequencies.keys()):
+			changeFrequency(interface, key)
+			sniff(iface=interface, prn=droneDetection, timeout=1)	
 
 @cli.command()
 @click.argument('interface')
