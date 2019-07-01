@@ -23,7 +23,7 @@ def hop(interface):
 	while True:
 		for key in sorted(channelFrequencies.keys()):
 			changeFrequency(interface, key)
-			sniff(iface=interface, prn=droneDetection, timeout=1)	
+			sniff(iface=interface, prn=droneDetection, timeout=0.5)	
 
 @cli.command()
 @click.argument('interface')
