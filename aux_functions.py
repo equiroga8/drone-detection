@@ -3,11 +3,11 @@ import click
 from scapy.all import *
 import re
 from subprocess import call
-from config import channelFrequencies, droneVendorMACs
+from constants import CHANNEL_FREQUENCIES, DRONE_VENDOR_MACS
 
-detectedMACs = []
+detected_MACs = []
 
-def changeToMonitorMode(interface):
+def change_to_monitor_mode(interface):
 	click.secho('-> Setting interface %s to monitor mode' % (interface), fg="bright_blue")
 	call(['systemctl', 'stop', 'NetworkManager'])
 	call(['ip', 'link', 'set', interface, 'down'])
@@ -15,29 +15,29 @@ def changeToMonitorMode(interface):
 	call(['ip', 'link', 'set', interface, 'up'])
 
 
-def changeFrequency(interface, channel):
-	freq = str(channelFrequencies[channel])
+def change_frequency(interface, channel):
+	freq = str(CHANNEL_FREQUENCIES[channel])
 	click.secho('-> Setting interface %s to monitor on channel %s (%s MHz)' % (interface, channel, freq), fg="bright_green")
 	call(['iw', 'dev', interface, 'set', 'freq', freq])
-	del detectedMACs[:]
+	del detected_MACs[:]
 
 
-def changeToManagedMode(interface):
+def change_to_managed_mode(interface):
 	click.secho('Setting interface %s to managed mode ' % (interface), fg="bright_green")
 	call(['ip', 'link', 'set', interface, 'down'])
 	call(['iw', interface, 'set', 'type', 'managed'])
 	call(['ip', 'link', 'set', interface, 'up'])
 	call(['systemctl', 'start', 'NetworkManager'])
 
-def droneDetection(pkt):
-	# create loop
-	addressList = [pkt.addr1, pkt.addr2, pkt.addr3, pkt.addr4]
-	isDroneMACAddress(addressList)
+def drone_detection(packet):
+	if packet.addr1:
+		address_list = [packet.addr1, packet.addr2, packet.addr3, packet.addr4]
+		is_drone_MAC_address(address_list)
 
-def isDroneMACAddress(addressList):
-	for address in addressList:
+def is_drone_MAC_address(address_list):
+	for address in address_list:
 		address = str(address)
-		droneVendorMAC = droneVendorMACs.get(address[:8])
-		if	re.match(r"([0-9a-fA-F]:?){12}", address) and droneVendorMAC != None and address not in detectedMACs:
-			click.secho('Detected %s device with MAC address %s' % (droneVendorMAC, address) , fg="red", bold=True)
-			detectedMACs.append(address)
+		drone_vendor_MAC = DRONE_VENDOR_MACS.get(address[:8])
+		if	re.match(r"([0-9a-fA-F]:?){12}", address) and drone_vendor_MAC != None and address not in detected_MACs:
+			click.secho('Detected %s device with MAC address %s' % (drone_vendor_MAC, address) , fg="red", bold=True)
+			detected_MACs.append(address)

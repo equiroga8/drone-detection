@@ -1,8 +1,9 @@
 #!/usr/bin/env python2
+
 import click
 from scapy.all import *
-from config import channelFrequencies
-from helper import changeToMonitorMode, changeFrequency, changeToManagedMode, droneDetection
+from constants import CHANNEL_FREQUENCIES
+from aux_functions import change_to_monitor_mode, change_frequency, change_to_managed_mode, drone_detection
 
 @click.group()
 def cli():
@@ -12,23 +13,24 @@ def cli():
 @click.option('-c', '--channel', default=1, help="Wifi channel number to listen on")
 @click.argument('interface')
 def static(interface, channel):
-	changeToMonitorMode(interface)
-	changeFrequency(interface, channel)
-	sniff(iface=interface, prn=droneDetection)
+	change_to_monitor_mode(interface)
+	change_frequency(interface, channel)
+	sniff(iface=interface, prn=drone_detection)
 
 @cli.command()
+@click.option('-t', '--time', default=0.5, help="Time to wait before changing to the next channel")
 @click.argument('interface')
-def hop(interface):
-	changeToMonitorMode(interface)
+def hop(interface, time):
+	change_to_monitor_mode(interface)
 	while True:
-		for key in sorted(channelFrequencies.keys()):
-			changeFrequency(interface, key)
-			sniff(iface=interface, prn=droneDetection, timeout=0.5)	
+		for key in sorted(CHANNEL_FREQUENCIES.keys()):
+			change_frequency(interface, key)
+			sniff(iface=interface, prn=drone_detection, timeout=time)	
 
 @cli.command()
 @click.argument('interface')
 def managed(interface):
-	changeToManagedMode(interface)
+	change_to_managed_mode(interface)
 
 
 if __name__ == '__main__':

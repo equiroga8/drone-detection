@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-channelFrequencies = {
+CHANNEL_FREQUENCIES = {
 	1: 2412,
 	2: 2417,
 	3: 2422,
@@ -27,7 +27,7 @@ channelFrequencies = {
 	112: 5560
 }
 
-droneVendorMACs = {
+DRONE_VENDOR_MACS = {
 
 	'a0:14:3d': 'Parrot',
 	'90:3a:e6': 'Parrot',
@@ -39,7 +39,7 @@ droneVendorMACs = {
 
 }
 
-phyTypes = {
+PHY_TYPES = {
 	"4": "802.11b",
 	"5": "802.11a",
 	"6": "802.11g",

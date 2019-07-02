@@ -20,7 +20,7 @@ iw list | grep monitor
 
 If monitor appears in the output that means that the interface can be put in monitor mode and that you can use dronitor on your computer. 
 
-This program uses python 2.7 and pip. Make sure you have both installed (you can check the version using `$ python -V`), if you don't, you can install them using the terminal.
+This program uses python 2.7 and pip. Make sure you have both installed (you can check the version by typing `$ python -V`) in the terminal. If you don't, you can install them using the terminal.
 ```
 sudo apt update
 sudo apt upgrade
@@ -46,7 +46,7 @@ You can now start using dronitor.
 
 ## Usage
 
-Dronitor scans all the packets in a channel for MAC addresses in a certain range. The Organizational Unique Identifier (OUI) is composed by the first 24 bits of a MAC address, which indicates the specific vendor for that device. 
+Dronitor detects devices by scaning all the packets in a channel for MAC addresses in a certain range. It uses the Organizational Unique Identifier (OUI) which is the first 24 bits of a MAC address. This indicates the specific vendor for that device. 
 
 <img src="https://aacable.files.wordpress.com/2018/02/mac-address.gif?w=435&h=196" align="right">
 
@@ -64,9 +64,9 @@ First it changes the wireless network card to monitor mode and scans all the WiF
 #### Hop
 With this command you can scan for drones on all the WiFi channels.
 ```
-sudo ./dronitor hop wlp2s0
+sudo ./dronitor hop wlp2s0 -t 0.5
 ```
-First it changes the wireless network card to monitor mode and then scans all the WiFi packets. It changes channel every 0.5 seconds and loops constantly through all the WiFi channels. If it finds a MAC address with an OUI that is on the list an alert will appear. In this command `wlp2s0` is the name of the wireless interface that will be used. To exit press `ctrl-c` for a few seconds.
+First it changes the wireless network card to monitor mode and then scans all the WiFi packets. It changes channel every 0.5 seconds and loops constantly through all the WiFi channels. If it finds a MAC address with an OUI that is on the list an alert will appear. In this command `wlp2s0` is the name of the wireless interface that will be used and `-t` or `--time` is the time to wait before changing to the next channel. To exit press `ctrl-c` for a few seconds.
 
 #### Managed
 
