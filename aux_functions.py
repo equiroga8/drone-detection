@@ -30,9 +30,11 @@ def change_to_managed_mode(interface):
 	call(['systemctl', 'start', 'NetworkManager'])
 
 def drone_detection(packet):
-	if packet.addr1:
+	try:
 		address_list = [packet.addr1, packet.addr2, packet.addr3, packet.addr4]
 		is_drone_MAC_address(address_list)
+	except AttributeError:
+		pass
 
 def is_drone_MAC_address(address_list):
 	for address in address_list:

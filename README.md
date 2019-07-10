@@ -18,9 +18,9 @@ To find out if the your wireless interface supports monitor mode type:
 iw list | grep monitor
 ```
 
-If monitor appears in the output that means that the interface can be put in monitor mode and that you can use dronitor on your computer. 
+If monitor appears in the output that means that the interface can be put in monitor mode and that you can use Dronitor on your computer. 
 
-This program uses python 2.7 and pip. Make sure you have both installed (you can check the version by typing `$ python -V`) in the terminal. If you don't, you can install them using the terminal.
+This program uses python 2.7 and pip. Make sure you have both installed (you can check the version by typing `python -V` in the terminal). If you don't, you can install them using the terminal.
 ```
 sudo apt update
 sudo apt upgrade
@@ -28,7 +28,7 @@ sudo apt install python2.7 python-pip
 ```
 ## Installation
 
-This program uses python 2.7 and various libraries such as [Click](https://click.palletsprojects.com/en/7.x/), to create a command line interface and [Scapy](https://scapy.readthedocs.io/en/latest/introduction.html), to sniff and dissect network packets. To install dronitor follow these steps:
+This program also uses various Python libraries/modules such as [Click](https://click.palletsprojects.com/en/7.x/), to create a command line interface and [Scapy](https://scapy.readthedocs.io/en/latest/introduction.html), to sniff and dissect network packets. To install dronitor follow these steps:
 
 Clone the repository.
 ```
